@@ -1,0 +1,14 @@
+{
+    "name": "petrsladek/skautis",
+    "description": "Servisni trida pro NetteFramework pro prihlasovani pres skautis",
+    "require": {
+        "skautis/skautis": "1.2.*",
+        "nette/nette": "~2.2.0"
+    },
+    "authors": [
+        {
+            "name": "Petr Sladek",
+            "email": "petr.sladek@skaut.cz"
+        }
+    ]
+}
