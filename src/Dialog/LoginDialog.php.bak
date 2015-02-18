@@ -1,0 +1,131 @@
+<?php
+
+namespace Myann\SkautIS\Dialog;
+
+use Myann\SkautIS\SkautIS;
+use Nette\Application\Request;
+use Nette\Application\Responses\ForwardResponse;
+use Nette\Application\UI\Presenter;
+use Nette\Application\UI\PresenterComponent;
+use Nette\Http\Session;
+use Nette\Http\UrlScript;
+use Nette\Application\AbortException;
+
+
+
+class LoginDialog extends PresenterComponent
+{
+    public $onResponse = array();
+
+
+    protected $skautis;
+    protected $session;
+
+    public function __construct(SkautIS $skautis)
+    {
+        $this->skautis = $skautis;
+        $this->session = $skautis->getSession(); /*$session->getSection(__CLASS__."/".$skautis->getAppId());*/
+
+        parent::__construct();
+    }
+
+
+    public function getSkautis() {
+        return $this->skautis;
+    }
+
+    /**
+     * @throws AbortException
+     */
+    public function open()
+    {
+        $this->session->last_request = $this->getPresenter()->storeRequest();
+        $this->presenter->redirectUrl($this->getUrl());
+    }
+
+
+
+	/**
+	 * Checks, if there is a user in storage and if not, it redirects to login dialog.
+	 * If the user is already in session storage, it will behave, as if were redirected from Google right now,
+	 * this means, it will directly call onResponse event.
+	 */
+	public function handleOpen()
+	{
+		$this->open();
+	}
+
+
+
+    /**
+     * @return UrlScript
+     */
+    public function getUrl()
+    {
+        $client = $this->google->client;
+        /** @var \Google_Auth_OAuth2 $auth */
+        $auth = $client->getAuth();
+
+        // response signal url
+        $client->setRedirectUri((string) $this->getReturnLink());
+
+        // CSRF
+        $this->session->establishCSRFTokenState();
+        $auth->setState($this->session->state);
+
+        return new UrlScript($this->google->client->createAuthUrl());
+    }
+
+
+
+
+    /**
+     * Google get's the url for this handle when redirecting to login dialog.
+     * It automatically calls the onResponse event.
+     *
+     * You don't have to redirect, the request before the auth process will be restored automatically.
+     */
+    public function handleResponse()
+    {
+        $token = $this->skautis->httpRequest->getPost('skautIS_Token');
+        $idRole = $this->skautis->httpRequest->getPost('skautIS_IDRole');
+        $idUnit = $this->skautis->httpRequest->getPost('skautIS_IDUnit');
+
+        if($token && $idRole && $idUnit) {
+            $this->skautis->client->setToken($token);
+            $this->skautis->client->setRoleId($idRole);
+            $this->skautis->client->setUnitId($idUnit);
+        }
+
+        $this->onResponse($this);
+
+        if (!empty($this->session->last_request)) {
+            $presenter = $this->getPresenter();
+
+            $requests = $presenter->getSession('Nette.Application/requests');
+            $user = $presenter->getUser();
+
+            $key = $this->session->last_request;
+            if (!isset($requests[$key]) || ($requests[$key][0] !== NULL && $requests[$key][0] !== $user->getId())) {
+                return;
+            }
+
+            /** @var Request $request */
+            $request = clone $requests[$key][1];
+            unset($requests[$key]);
+
+            $params = $request->getParameters();
+            $params[Presenter::FLASH_KEY] = $this->getParameter(Presenter::FLASH_KEY);
+            unset($params['do']);
+
+            $request->setParameters($params);
+            $request->setFlag(Request::RESTORED, TRUE);
+
+            $presenter->sendResponse(new ForwardResponse($request));
+        }
+
+        $this->presenter->redirect('this', array('state' => NULL, 'code' => NULL));
+    }
+
+
+}
