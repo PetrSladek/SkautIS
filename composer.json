@@ -2,7 +2,7 @@
     "name": "petrsladek/skautis",
     "description": "Servisni trida pro NetteFramework pro prihlasovani pres skautis",
     "require": {
-        "nette/nette": "~2.1@dev",
+        "nette/nette": "~2.3",
         "skautis/skautis": "1.2.*"
     },
     "authors": [
