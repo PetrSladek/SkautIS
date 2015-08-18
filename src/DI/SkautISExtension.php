@@ -12,8 +12,8 @@ class SkautISExtension extends CompilerExtension
 
 	/** @var array */
 	public $defaults = array(
-		'appId' => NULL, // kdyby-style naming
-		'testMode' => true,
+//		'appId' => NULL, // kdyby-style naming
+//		'testMode' => true,
         'clearAllWithLogout' => true,
 	);
 

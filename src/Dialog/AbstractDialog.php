@@ -107,34 +107,38 @@ abstract class AbstractDialog extends PresenterComponent
     public function handleResponse()
     {
 
+        unset($this->session->signal_response_link);
+        unset($this->session->last_request);
+
         $this->onResponse($this);
 
-        if (!empty($this->session->signal_response_link)) {
-            unset($this->session->signal_response_link);
-        }
 
-        if (!empty($this->session->last_request)) {
-            $presenter = $this->getPresenter();
-
-            try {
-                $presenter->restoreRequest($this->session->last_request);
-
-            } catch (Application\AbortException $e) {
-                $refl = new \ReflectionProperty('Nette\Application\UI\Presenter', 'response');
-                $refl->setAccessible(TRUE);
-
-                $response = $refl->getValue($presenter);
-                if ($response instanceof Responses\ForwardResponse) {
-                    $forwardRequest = $response->getRequest();
-
-                    $params = $forwardRequest->getParameters();
-                    unset($params['do']); // remove the signal to the google component
-                    $forwardRequest->setParameters($params);
-                }
-
-                $presenter->sendResponse($response);
-            }
-        }
+//        if (!empty($this->session->signal_response_link)) {
+//            unset($this->session->signal_response_link);
+//        }
+//
+//        if (!empty($this->session->last_request)) {
+//            $presenter = $this->getPresenter();
+//
+//            try {
+//                $presenter->restoreRequest($this->session->last_request);
+//
+//            } catch (Application\AbortException $e) {
+//                $refl = new \ReflectionProperty('Nette\Application\UI\Presenter', 'response');
+//                $refl->setAccessible(TRUE);
+//
+//                $response = $refl->getValue($presenter);
+//                if ($response instanceof Responses\ForwardResponse) {
+//                    $forwardRequest = $response->getRequest();
+//
+//                    $params = $forwardRequest->getParameters();
+//                    unset($params['do']); // remove the signal to the google component
+//                    $forwardRequest->setParameters($params);
+//                }
+//
+//                $presenter->sendResponse($response);
+//            }
+//        }
 
         $this->presenter->redirect('this', array('state' => NULL, 'code' => NULL));
     }

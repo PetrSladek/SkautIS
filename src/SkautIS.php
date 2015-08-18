@@ -6,6 +6,7 @@ use Nette\Application;
 use Nette\Http\ISessionStorage;
 use Nette\Http\Request;
 use Nette\Object;
+use Nette\Security\User;
 
 class SkautIS extends Object
 {
@@ -43,12 +44,21 @@ class SkautIS extends Object
     protected $personId;
 
 
-	public function __construct(Application\Application $app, Request $httpRequest, SessionStorage $session, \SkautIS\SkautIS $client)
+	public function __construct(Application\Application $app, User $user, Request $httpRequest, SessionStorage $session, \SkautIS\SkautIS $client)
 	{
 		$this->app = $app;
 		$this->httpRequest = $httpRequest;
 		$this->session = $session;
 		$this->client = $client;
+
+        if($user->isLoggedIn() && $this->isLoggedIn())
+            $this->getClient()->getUser()->updateLogoutTime();
+
+        // Po odhlaseni nette uzivatele odhlasit i skautis
+        $user->onLoggedOut[] = function() {
+            $this->destroySession();
+            $this->getClient()->getUser()->resetLoginData();
+        };
 
 		$this->tryProcessResponse(); // ToDo nastavit v extensne do AfterCopile - pak to bude mozna fungovat i v presenterech ktery nemaji tuhle tridu injectlou
 	}
@@ -57,17 +67,14 @@ class SkautIS extends Object
 
         // vytahnu data z response
         $token = $this->httpRequest->getPost('skautIS_Token');
-        $idRole = $this->httpRequest->getPost('skautIS_IDRole');
-        $idUnit = $this->httpRequest->getPost('skautIS_IDUnit');
 
         if($token) { // Pokud prisel v HTTP POSTu token
             // Nastavim ho
-            $this->client->setToken($token);
-            $this->client->setRoleId($idRole);
-            $this->client->setUnitId($idUnit);
+            $this->client->setLoginData($this->httpRequest->getPost());
 
             // A po nacteni aplikace zajistim presmerovani na signal response! komponenty, ktera login dialog otevřela
             $this->app->onPresenter[] = function(Application\Application $sender, Application\UI\Presenter $presenter) {
+
                 $presenter->onShutdown[] = function(Application\UI\Presenter $presenter) {
 
                     if(!empty($this->session->signal_response_link)) {
@@ -110,7 +117,7 @@ class SkautIS extends Object
 
 
     public function isLoggedIn() {
-        return $this->client->isLoggedIn();
+        return $this->client->getUser()->isLoggedIn();
     }
 
 
@@ -121,7 +128,7 @@ class SkautIS extends Object
         if(!$this->isLoggedIn())
             return null;
 
-        return $this->client->user->UserDetail();
+        return $this->client->usr->UserDetail();
     }
 
 

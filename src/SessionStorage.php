@@ -25,7 +25,7 @@ class SessionStorage extends Object
 	 */
 	public function __construct(\SkautIS\SkautIS $skautIS, \Nette\Http\Session $session)
 	{
-		$this->session = $session->getSection(__CLASS__. "/" . $skautIS->getAppId());
+		$this->session = $session->getSection(__CLASS__. "/" . $skautIS->getConfig()->getAppId());
 	}
 
 
