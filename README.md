@@ -58,9 +58,11 @@ class LoginPresenter extends BasePresenter
 	 * Vytvoří komponentu pro otevření login dialogu SkautISu
 	 * @return \Kdyby\Google\Dialog\LoginDialog
 	 */
-	protected function createComponentSkautisLogin()
+	protected function createComponentSkautisLoginDialog()
 	{
 		$dialog = new \PetrSladek\SkautIS\Dialog\LoginDialog($this->skautis);
+		// nebo $dialog = $this->skautis->createLoginDialog();
+
 		$dialog->onResponse[] = function(\PetrSladek\SkautIS\Dialog\LoginDialog $dialog) {
 			$skautis = $dialog->getSkautIS();
 
@@ -117,15 +119,15 @@ Do šablony pak stačí přigat odkaz na handler open! této komponenty.
 
 ```smarty
 {* By the way, this is how you do a link to signal of subcomponent. *}
-<a n:href="googleLogin-open!">Login using google</a>
+<a n:href="skautisLoginDialog-open!">Login using google</a>
 ```
 
 
 V případě že chceme na Skautis přihlášení přesměrovat z prezentru, použijeme  následující zápis (v presenteru který má přístup k výše definované komponentě)
 
 ```php
-if(!$this->getUser()->isLoggedIn()) { // nebo if(!$skautis->isLoggedIn()) pro skautis uzivatele
-    $this['skautisLogin']->open();
+if(!$this->user->isLoggedIn()) { // nebo if(!$skautis->isLoggedIn()) pro skautis uzivatele
+    $this['skautisLoginDialog']->open(); // presmeruje na skautis prihlaseni a po navraceni standartne provede onResponse event.
 }
 ```
 
