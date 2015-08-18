@@ -3,7 +3,7 @@
     "description": "Servisni trida pro NetteFramework pro prihlasovani pres skautis",
     "require": {
         "nette/nette": "~2.3",
-        "skautis/skautis": "1.2.*"
+        "skautis/nette": "2.0.*"
     },
     "authors": [
         {
