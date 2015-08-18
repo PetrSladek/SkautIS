@@ -115,11 +115,10 @@ class LoginPresenter extends BasePresenter
 }
 ```
 
-Do šablony pak stačí přigat odkaz na handler open! této komponenty.
+Do šablony pak stačí přigat odkaz na handler open! této pod-komponenty.
 
 ```smarty
-{* By the way, this is how you do a link to signal of subcomponent. *}
-<a n:href="skautisLoginDialog-open!">Login using google</a>
+<a n:href="skautisLoginDialog-open!">Prihlásit se přes SkautIS!</a>
 ```
 
 
