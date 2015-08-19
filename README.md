@@ -56,7 +56,7 @@ class LoginPresenter extends BasePresenter
 
 	/**
 	 * Vytvoří komponentu pro otevření login dialogu SkautISu
-	 * @return \Kdyby\Google\Dialog\LoginDialog
+	 * @return \PetrSladek\SkautIS\Dialog\LoginDialog
 	 */
 	protected function createComponentSkautisLoginDialog()
 	{
